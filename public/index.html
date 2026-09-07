@@ -427,8 +427,8 @@ socket.on('state', (state) => {
       else if (myAlive) {
         const dx = p.x - predX, dy = p.y - predY;
         const d = Math.hypot(dx, dy);
-        if (d > 120)    { predX = p.x; predY = p.y; }
-        else if (d > 4) { predX += dx * 0.25; predY += dy * 0.25; }
+        if (d > 200)     { predX = p.x; predY = p.y; }
+        else if (d > 12) { predX += dx * 0.08; predY += dy * 0.08; }
       } else { predX = p.x; predY = p.y; }
     } else {
       if (!interpBuffers[p.id]) interpBuffers[p.id] = [];
