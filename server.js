@@ -28,14 +28,14 @@ const MUZZLE_OFFSET  = 42;
 const MAGS_MAX       = 3;
 const BULLETS_PER_MAG = 10;
 const MAG_REGEN_TIME = 2500;
-const REGEN_DELAY    = 2000;
-const REGEN_RATE     = 300;
+const REGEN_DELAY    = 4000;
+const REGEN_RATE     = 800;
 
 const GRENADE_SPEED            = 380;
 const GRENADE_LIFETIME         = 1800;
 const GRENADE_RADIUS           = 10;
 const GRENADE_EXPLOSION_RADIUS = 160;
-const GRENADE_DAMAGE           = 80;
+const GRENADE_DAMAGE           = 2000;
 const GRENADE_MAX_BOUNCES      = 3;
 const SUPER_CHARGE_PER_DAMAGE  = 0.2;
 const SUPER_CHARGE_PER_KILL    = 10;
@@ -531,6 +531,23 @@ setInterval(() => {
   if (restored.length > 0) io.emit('cellsRestored', restored);
 }, 1000);
 
+// ---- LOBBIES ----
+const pendingLobbies = {};
+
+function genLobbyCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code;
+  do { code = Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join(''); }
+  while (pendingLobbies[code]);
+  return code;
+}
+
+function lobbyPublicList() {
+  return Object.values(pendingLobbies)
+    .filter(l => !l.started)
+    .map(l => ({ code: l.code, playerCount: l.players.length, hostName: l.players[0]?.name || '?' }));
+}
+
 // ---- SOCKETS ----
 io.on('connection', (socket) => {
   socket.on('join', ({ name, userId }) => {
@@ -595,10 +612,64 @@ io.on('connection', (socket) => {
     };
   });
 
+  // -- Lobby handlers --
+  socket.on('createLobby', ({ name }) => {
+    const code = genLobbyCode();
+    pendingLobbies[code] = {
+      code, hostId: socket.id,
+      players: [{ id: socket.id, name: (name || 'Player').substring(0, 16) }],
+      started: false,
+    };
+    socket.join(`lobby_${code}`);
+    socket.emit('lobbyCreated', { code, players: pendingLobbies[code].players, hostId: socket.id });
+  });
+
+  socket.on('joinLobby', ({ code, name }) => {
+    const lobby = pendingLobbies[code];
+    if (!lobby) { socket.emit('lobbyError', 'Lobby not found. Check the code.'); return; }
+    if (lobby.started) { socket.emit('lobbyError', 'That lobby already started.'); return; }
+    if (lobby.players.find(p => p.id === socket.id)) return; // already in
+    lobby.players.push({ id: socket.id, name: (name || 'Player').substring(0, 16) });
+    socket.join(`lobby_${code}`);
+    socket.emit('lobbyJoined', { code, players: lobby.players, hostId: lobby.hostId });
+    socket.to(`lobby_${code}`).emit('lobbyUpdate', { players: lobby.players, hostId: lobby.hostId });
+  });
+
+  socket.on('leaveLobby', ({ code }) => {
+    const lobby = pendingLobbies[code];
+    if (!lobby) return;
+    lobby.players = lobby.players.filter(p => p.id !== socket.id);
+    socket.leave(`lobby_${code}`);
+    if (lobby.players.length === 0) { delete pendingLobbies[code]; return; }
+    // Transfer host if host left
+    if (lobby.hostId === socket.id) lobby.hostId = lobby.players[0].id;
+    io.to(`lobby_${code}`).emit('lobbyUpdate', { players: lobby.players, hostId: lobby.hostId });
+  });
+
+  socket.on('startLobby', ({ code, scheme }) => {
+    const lobby = pendingLobbies[code];
+    if (!lobby || lobby.hostId !== socket.id) return;
+    lobby.started = true;
+    io.to(`lobby_${code}`).emit('lobbyStarted', { scheme: scheme || 'mouse' });
+    delete pendingLobbies[code];
+  });
+
+  socket.on('listLobbies', () => {
+    socket.emit('lobbyList', lobbyPublicList());
+  });
+
   socket.on('disconnect', () => {
     const p = players[socket.id];
     if (p) console.log(`${p.name} left`);
     delete players[socket.id];
+    // Clean up lobbies
+    for (const code in pendingLobbies) {
+      const lobby = pendingLobbies[code];
+      lobby.players = lobby.players.filter(pl => pl.id !== socket.id);
+      if (lobby.players.length === 0) { delete pendingLobbies[code]; continue; }
+      if (lobby.hostId === socket.id) lobby.hostId = lobby.players[0].id;
+      io.to(`lobby_${code}`).emit('lobbyUpdate', { players: lobby.players, hostId: lobby.hostId });
+    }
   });
 });
 
