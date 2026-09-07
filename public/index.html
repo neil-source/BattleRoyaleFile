@@ -114,15 +114,13 @@ let keyboardAngle = 0;
 let keyboardTargetAngle = 0;
 const KB_ROT_SPEED = 14; // radians per second
 
-// Screen shake
+// Screen shake (kept for hitFlash intensity scaling; no longer moves world camera)
 const shake = { x: 0, y: 0, mag: 0 };
 function addShake(mag) { shake.mag = Math.max(shake.mag, mag); }
 function updateShake(dt) {
-  if (shake.mag < 0.3) { shake.x = 0; shake.y = 0; shake.mag = 0; return; }
-  const a = Math.random() * Math.PI * 2;
-  shake.x = Math.cos(a) * shake.mag;
-  shake.y = Math.sin(a) * shake.mag;
-  shake.mag *= Math.pow(0.08, dt); // fast decay
+  shake.x = 0; shake.y = 0;
+  if (shake.mag < 0.3) { shake.mag = 0; return; }
+  shake.mag *= Math.pow(0.08, dt);
 }
 
 // Hit flash (red screen pulse)
@@ -1036,8 +1034,8 @@ function render(now) {
 
   if (!myId || !predReady || !grid) return;
 
-  const camX = predX - canvas.width / 2 + shake.x;
-  const camY = predY - canvas.height / 2 + shake.y;
+  const camX = predX - canvas.width / 2;
+  const camY = predY - canvas.height / 2;
 
   ctx.save();
   ctx.translate(-camX, -camY);
@@ -1232,7 +1230,7 @@ function render(now) {
 
   // Red flash when hit
   if (hitFlash > 0) {
-    ctx.fillStyle = `rgba(220,0,0,${hitFlash * 0.45})`;
+    ctx.fillStyle = `rgba(220,0,0,${hitFlash * 0.55})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     // Red vignette edges
     const vg = ctx.createRadialGradient(canvas.width/2, canvas.height/2, canvas.height*0.25, canvas.width/2, canvas.height/2, canvas.height*0.8);
