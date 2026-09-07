@@ -743,92 +743,140 @@ function drawPlayer(id, x, y, angle, hp, name, color, kills, mags, magProgress, 
 
   // Ground shadow
   ctx.save();
-  ctx.globalAlpha = 0.38;
+  ctx.globalAlpha = 0.32;
   ctx.fillStyle = '#000';
   ctx.beginPath();
-  ctx.ellipse(cx + 3, cy + 23, 20, 7, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx + 2, cy + 25, 21, 7, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 
-  // Gun (rotated with aim angle, drawn behind body)
+  // Gun (rotated with aim angle, behind body)
   ctx.save();
-  ctx.translate(cx, cy - 2);
+  ctx.translate(cx, cy - 4);
   ctx.rotate(angle);
-  ctx.fillStyle = '#3a3a3a';
-  ctx.beginPath(); ctx.roundRect(10, -4, 30, 9, 3); ctx.fill();
-  ctx.fillStyle = '#666';
-  ctx.fillRect(12, -2, 26, 3);
-  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.8;
-  ctx.beginPath(); ctx.roundRect(10, -4, 30, 9, 3); ctx.stroke();
+  // Handle
+  ctx.fillStyle = '#2a2a2a';
+  ctx.beginPath(); ctx.roundRect(8, -1, 7, 11, 2); ctx.fill();
+  // Body
+  ctx.fillStyle = '#484848';
+  ctx.beginPath(); ctx.roundRect(13, -5, 30, 12, 3); ctx.fill();
+  // Barrel highlight
+  ctx.fillStyle = '#686868';
+  ctx.fillRect(15, -3, 26, 4);
+  // Muzzle flash guard
+  ctx.fillStyle = '#555';
+  ctx.beginPath(); ctx.roundRect(41, -4, 5, 10, 2); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(13, -5, 30, 12, 3); ctx.stroke();
   ctx.restore();
 
-  if (isMe) { ctx.shadowColor = color; ctx.shadowBlur = 18; }
+  if (isMe) { ctx.shadowColor = color; ctx.shadowBlur = 22; }
 
-  // Feet (drawn behind body)
-  const darkC = lerpColor(color, -60);
-  ctx.fillStyle = darkC;
-  ctx.beginPath(); ctx.ellipse(cx - 8, cy + 20, 8, 6, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 8, cy + 20, 8, 6, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.8;
-  ctx.beginPath(); ctx.ellipse(cx - 8, cy + 20, 8, 6, 0, 0, Math.PI * 2); ctx.stroke();
-  ctx.beginPath(); ctx.ellipse(cx + 8, cy + 20, 8, 6, 0, 0, Math.PI * 2); ctx.stroke();
+  // Shoes
+  const shoeC = lerpColor(color, -75);
+  // Left shoe
+  ctx.fillStyle = shoeC;
+  ctx.beginPath(); ctx.ellipse(cx - 9, cy + 22, 9, 6, -0.12, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(cx - 9, cy + 22, 9, 6, -0.12, 0, Math.PI * 2); ctx.stroke();
+  // Right shoe
+  ctx.fillStyle = shoeC;
+  ctx.beginPath(); ctx.ellipse(cx + 9, cy + 22, 9, 6, 0.12, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(cx + 9, cy + 22, 9, 6, 0.12, 0, Math.PI * 2); ctx.stroke();
 
-  // Body (trapezoid, wider at shoulders)
+  // Body
   ctx.fillStyle = color;
   ctx.beginPath();
-  ctx.moveTo(cx - 14, cy + 3);
-  ctx.lineTo(cx + 14, cy + 3);
-  ctx.lineTo(cx + 11, cy + 21);
-  ctx.lineTo(cx - 11, cy + 21);
+  ctx.moveTo(cx - 14, cy + 5);
+  ctx.bezierCurveTo(cx - 16, cy + 5, cx - 16, cy + 8, cx - 13, cy + 22);
+  ctx.lineTo(cx + 13, cy + 22);
+  ctx.bezierCurveTo(cx + 16, cy + 8, cx + 16, cy + 5, cx + 14, cy + 5);
   ctx.closePath();
   ctx.fill();
-  // Top surface (depth)
-  ctx.fillStyle = lerpColor(color, -25);
-  ctx.beginPath(); ctx.ellipse(cx, cy + 3, 14, 4.5, 0, 0, Math.PI * 2); ctx.fill();
-  // Highlight
-  ctx.globalAlpha = 0.35;
+  // Body top surface (depth)
+  ctx.fillStyle = lerpColor(color, -30);
+  ctx.beginPath(); ctx.ellipse(cx, cy + 5, 14, 5, 0, 0, Math.PI * 2); ctx.fill();
+  // Body shine
+  ctx.globalAlpha = 0.38;
   ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.ellipse(cx - 2, cy + 10, 8, 6, -0.2, Math.PI, 0); ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(cx - 4, cy + 11, 7, 9, -0.25, Math.PI * 1.15, Math.PI * 1.85);
+  ctx.fill();
   ctx.globalAlpha = 1;
   // Body outline
   ctx.strokeStyle = '#111'; ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.moveTo(cx - 14, cy + 3);
-  ctx.lineTo(cx + 14, cy + 3);
-  ctx.lineTo(cx + 11, cy + 21);
-  ctx.lineTo(cx - 11, cy + 21);
+  ctx.moveTo(cx - 14, cy + 5);
+  ctx.bezierCurveTo(cx - 16, cy + 5, cx - 16, cy + 8, cx - 13, cy + 22);
+  ctx.lineTo(cx + 13, cy + 22);
+  ctx.bezierCurveTo(cx + 16, cy + 8, cx + 16, cy + 5, cx + 14, cy + 5);
   ctx.closePath();
   ctx.stroke();
 
-  // Head
+  // Ear (left, behind head)
+  ctx.fillStyle = lerpColor(color, -15);
+  ctx.beginPath(); ctx.ellipse(cx - 18, cy - 8, 6, 8, -0.15, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(cx - 18, cy - 8, 6, 8, -0.15, 0, Math.PI * 2); ctx.stroke();
+  // Inner ear
+  ctx.fillStyle = lerpColor(color, 25);
+  ctx.beginPath(); ctx.ellipse(cx - 18, cy - 8, 3.5, 5, -0.15, 0, Math.PI * 2); ctx.fill();
+
+  // Head (big round, 3D shaded)
   ctx.fillStyle = color;
-  ctx.beginPath(); ctx.ellipse(cx, cy - 7, 18, 17, 0, 0, Math.PI * 2); ctx.fill();
-  const hg = ctx.createRadialGradient(cx - 7, cy - 16, 1, cx, cy - 7, 20);
-  hg.addColorStop(0, 'rgba(255,255,255,0.52)');
-  hg.addColorStop(0.55, 'rgba(255,255,255,0)');
-  hg.addColorStop(1, 'rgba(0,0,0,0.22)');
+  ctx.beginPath(); ctx.arc(cx, cy - 8, 19, 0, Math.PI * 2); ctx.fill();
+  // Radial gradient for 3D look
+  const hg = ctx.createRadialGradient(cx - 8, cy - 18, 2, cx, cy - 8, 21);
+  hg.addColorStop(0, 'rgba(255,255,255,0.58)');
+  hg.addColorStop(0.45, 'rgba(255,255,255,0.08)');
+  hg.addColorStop(1, 'rgba(0,0,0,0.28)');
   ctx.fillStyle = hg;
-  ctx.beginPath(); ctx.ellipse(cx, cy - 7, 18, 17, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#111'; ctx.lineWidth = 2.5;
-  ctx.beginPath(); ctx.ellipse(cx, cy - 7, 18, 17, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy - 8, 19, 0, Math.PI * 2); ctx.fill();
+  // Head outline
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx, cy - 8, 19, 0, Math.PI * 2); ctx.stroke();
+
+  // Hair tuft
+  ctx.fillStyle = lerpColor(color, -50);
+  ctx.beginPath();
+  ctx.arc(cx - 4, cy - 26, 5, Math.PI, 0);
+  ctx.arc(cx + 4, cy - 26, 4, Math.PI, 0);
+  ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.arc(cx - 4, cy - 26, 5, Math.PI, 0);
+  ctx.arc(cx + 4, cy - 26, 4, Math.PI, 0);
+  ctx.stroke();
 
   ctx.shadowBlur = 0;
 
-  // Eyes
-  const eyeY = cy - 7;
+  // Eyebrows
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2.8; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(cx - 13, cy - 17); ctx.lineTo(cx - 5, cy - 15); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx + 13, cy - 17); ctx.lineTo(cx + 5, cy - 15); ctx.stroke();
+
+  // Eyes (white sclera)
+  const eyeY = cy - 8;
   ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.ellipse(cx - 7, eyeY, 5, 6, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 7, eyeY, 5, 6, 0, 0, Math.PI * 2); ctx.fill();
-  const pdx = Math.cos(angle) * 1.8, pdy = Math.sin(angle) * 1.8;
-  ctx.fillStyle = '#111';
-  ctx.beginPath(); ctx.ellipse(cx - 7 + pdx, eyeY + pdy, 3, 3.5, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 7 + pdx, eyeY + pdy, 3, 3.5, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,0.9)';
-  ctx.beginPath(); ctx.ellipse(cx - 8.5 + pdx, eyeY - 2 + pdy, 1.5, 1.5, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 5.5 + pdx, eyeY - 2 + pdy, 1.5, 1.5, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#222'; ctx.lineWidth = 1.2;
-  ctx.beginPath(); ctx.ellipse(cx - 7, eyeY, 5, 6, 0, 0, Math.PI * 2); ctx.stroke();
-  ctx.beginPath(); ctx.ellipse(cx + 7, eyeY, 5, 6, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx - 7, eyeY, 5.5, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 7, eyeY, 5.5, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+  // Pupils (follow aim direction)
+  const pdx = Math.cos(angle) * 2, pdy = Math.sin(angle) * 2;
+  ctx.fillStyle = '#1a1a1a';
+  ctx.beginPath(); ctx.ellipse(cx - 7 + pdx, eyeY + pdy, 3.5, 4, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 7 + pdx, eyeY + pdy, 3.5, 4, 0, 0, Math.PI * 2); ctx.fill();
+  // Shine
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.beginPath(); ctx.arc(cx - 8.5 + pdx, eyeY - 2.5 + pdy, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 5.5 + pdx, eyeY - 2.5 + pdy, 2, 0, Math.PI * 2); ctx.fill();
+  // Eye outlines
+  ctx.strokeStyle = '#222'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.ellipse(cx - 7, eyeY, 5.5, 6.5, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx + 7, eyeY, 5.5, 6.5, 0, 0, Math.PI * 2); ctx.stroke();
+  // Smile
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(cx, cy - 1, 6, 0.15, Math.PI - 0.15); ctx.stroke();
 
   ctx.textAlign = 'center';
   ctx.font = 'bold 13px Arial';
