@@ -94,6 +94,21 @@ let mySuperCharge = 0;
 let myCoins = 0;
 let predX = 0, predY = 0, predAngle = 0, predReady = false;
 let clientLastShot = 0;
+
+// Client-side predicted bullets (instant visual on fire, expire before server state doubles)
+const localBullets = [];
+const LB_BULLET_SPEED = 520, LB_MAX_RANGE = 450, LB_STAGGER = 75, LB_BULLETS = 10;
+function spawnLocalBullets(angle) {
+  for (let i = 0; i < LB_BULLETS; i++) {
+    setTimeout(() => {
+      if (!myAlive) return;
+      const spread = (Math.random() - 0.5) * 0.1;
+      const a = angle + spread;
+      const sx = predX + Math.cos(a) * 42, sy = predY + Math.sin(a) * 42;
+      localBullets.push({ x: sx, y: sy, sx, sy, vx: Math.cos(a) * LB_BULLET_SPEED, vy: Math.sin(a) * LB_BULLET_SPEED, born: performance.now() });
+    }, i * LB_STAGGER);
+  }
+}
 let controlScheme = 'mouse';
 let keyboardAngle = 0;
 let keyboardTargetAngle = 0;
@@ -528,7 +543,7 @@ let mouseX = 0, mouseY = 0, aimMode = false;
 document.addEventListener('keydown', e => {
   keys[e.code] = true;
   if (e.code === 'Space') e.preventDefault();
-  if (e.code === 'Space' && myId && myAlive) { socket.emit('fireMag'); e.preventDefault(); }
+  if (e.code === 'Space' && myId && myAlive) { socket.emit('fireMag', { angle: predAngle }); spawnLocalBullets(predAngle); e.preventDefault(); }
   if ((e.code === 'ShiftLeft' || e.code === 'ShiftRight') && controlScheme === 'keyboard') { aimMode = !aimMode; e.preventDefault(); }
   if (e.code === 'KeyE' && myId && myAlive && mySuperCharge >= 100) {
     socket.emit('super');
@@ -538,7 +553,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('keyup',   e => { keys[e.code] = false; });
 canvas.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
 canvas.addEventListener('mousedown', e => {
-  if (e.button === 0 && myId && myAlive) socket.emit('fireMag');
+  if (e.button === 0 && myId && myAlive) { socket.emit('fireMag', { angle: predAngle }); spawnLocalBullets(predAngle); }
   if (e.button === 2) aimMode = true;
 });
 canvas.addEventListener('mouseup', e => { if (e.button === 2) aimMode = false; });
@@ -989,6 +1004,20 @@ function render(now) {
     ctx.shadowColor = b.c; ctx.shadowBlur = 10;
     ctx.fillStyle = b.c;    ctx.fillRect(bx - 3, by - 3, 6, 6);
     ctx.fillStyle = '#fff'; ctx.fillRect(bx - 1, by - 1, 2, 2);
+    ctx.shadowBlur = 0;
+  }
+
+  // Local predicted bullets (instant visual before server responds)
+  for (let i = localBullets.length - 1; i >= 0; i--) {
+    const b = localBullets[i];
+    const age = (performance.now() - b.born) / 1000;
+    b.x = b.sx + b.vx * age; b.y = b.sy + b.vy * age;
+    const dist = Math.hypot(b.x - b.sx, b.y - b.sy);
+    if (dist >= LB_MAX_RANGE || age > 0.35) { localBullets.splice(i, 1); continue; }
+    const bx = Math.round(b.x), by = Math.round(b.y);
+    ctx.shadowColor = myColor; ctx.shadowBlur = 10;
+    ctx.fillStyle = myColor; ctx.fillRect(bx - 3, by - 3, 6, 6);
+    ctx.fillStyle = '#fff';  ctx.fillRect(bx - 1, by - 1, 2, 2);
     ctx.shadowBlur = 0;
   }
 

@@ -557,16 +557,17 @@ io.on('connection', (socket) => {
 
   socket.on('input', (inp) => { const p = players[socket.id]; if (p) p.input = inp; });
 
-  socket.on('fireMag', () => {
+  socket.on('fireMag', (data) => {
     const p = players[socket.id];
     if (!p || !p.alive || p.mags <= 0) return;
+    const fireAngle = (data && typeof data.angle === 'number') ? data.angle : p.angle;
     p.mags--;
     p.lastMagAt = Date.now();
     for (let i = 0; i < BULLETS_PER_MAG; i++) {
       setTimeout(() => {
         if (!p.alive) return;
         const spread = (Math.random() - 0.5) * 0.1;
-        const a = p.angle + spread;
+        const a = fireAngle + spread;
         const bsx = p.x + Math.cos(a) * MUZZLE_OFFSET;
         const bsy = p.y + Math.sin(a) * MUZZLE_OFFSET;
         bullets[bulletId++] = {
