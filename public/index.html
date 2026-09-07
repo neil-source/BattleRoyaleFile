@@ -761,159 +761,232 @@ function drawPlayer(id, x, y, angle, hp, name, color, kills, mags, magProgress, 
   ctx.globalAlpha = 0.32;
   ctx.fillStyle = '#000';
   ctx.beginPath();
-  ctx.ellipse(cx + 2, cy + 25, 21, 7, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx + 2, cy + 24, 20, 6, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 
-  // Gun (rotated with aim angle, behind body)
+  // Revolver (Colt-style, rotated with aim)
   ctx.save();
   ctx.translate(cx, cy - 4);
   ctx.rotate(angle);
-  // Handle
-  ctx.fillStyle = '#2a2a2a';
-  ctx.beginPath(); ctx.roundRect(8, -1, 7, 11, 2); ctx.fill();
-  // Body
-  ctx.fillStyle = '#484848';
-  ctx.beginPath(); ctx.roundRect(13, -5, 30, 12, 3); ctx.fill();
-  // Barrel highlight
-  ctx.fillStyle = '#686868';
-  ctx.fillRect(15, -3, 26, 4);
-  // Muzzle flash guard
+  // Handle (wooden grip)
+  ctx.fillStyle = '#6B3A1F';
+  ctx.beginPath(); ctx.roundRect(9, 1, 7, 12, 2); ctx.fill();
+  ctx.fillStyle = '#8B4A2A';
+  ctx.fillRect(10, 2, 4, 8);
+  // Cylinder
   ctx.fillStyle = '#555';
-  ctx.beginPath(); ctx.roundRect(41, -4, 5, 10, 2); ctx.fill();
-  ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.roundRect(13, -5, 30, 12, 3); ctx.stroke();
+  ctx.beginPath(); ctx.arc(16, 2, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#777';
+  ctx.beginPath(); ctx.arc(16, 2, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(16, 2, 6, 0, Math.PI * 2); ctx.stroke();
+  // Barrel
+  ctx.fillStyle = '#444';
+  ctx.beginPath(); ctx.roundRect(18, -3, 26, 7, 2); ctx.fill();
+  ctx.fillStyle = '#666';
+  ctx.fillRect(20, -2, 22, 2);
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(18, -3, 26, 7, 2); ctx.stroke();
+  // Handle outline
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(9, 1, 7, 12, 2); ctx.stroke();
   ctx.restore();
 
   if (isMe) { ctx.shadowColor = color; ctx.shadowBlur = 22; }
 
-  // Shoes
-  const shoeC = lerpColor(color, -75);
-  // Left shoe
-  ctx.fillStyle = shoeC;
-  ctx.beginPath(); ctx.ellipse(cx - 9, cy + 22, 9, 6, -0.12, 0, Math.PI * 2); ctx.fill();
+  // Cowboy boots (dark brown, Colt style)
+  const bootC = '#3D2010';
+  ctx.fillStyle = bootC;
+  ctx.beginPath(); ctx.ellipse(cx - 8, cy + 22, 9, 6, -0.1, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.ellipse(cx - 9, cy + 22, 9, 6, -0.12, 0, Math.PI * 2); ctx.stroke();
-  // Right shoe
-  ctx.fillStyle = shoeC;
-  ctx.beginPath(); ctx.ellipse(cx + 9, cy + 22, 9, 6, 0.12, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx - 8, cy + 22, 9, 6, -0.1, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = bootC;
+  ctx.beginPath(); ctx.ellipse(cx + 8, cy + 22, 9, 6, 0.1, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.ellipse(cx + 9, cy + 22, 9, 6, 0.12, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx + 8, cy + 22, 9, 6, 0.1, 0, Math.PI * 2); ctx.stroke();
+  // Boot spurs (tiny circles)
+  ctx.fillStyle = '#FFD700';
+  ctx.beginPath(); ctx.arc(cx - 16, cy + 23, 2.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 16, cy + 23, 2.5, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(cx - 16, cy + 23, 2.5, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx + 16, cy + 23, 2.5, 0, Math.PI * 2); ctx.stroke();
 
-  // Body
+  // Body (player color outfit)
   ctx.fillStyle = color;
   ctx.beginPath();
-  ctx.moveTo(cx - 14, cy + 5);
-  ctx.bezierCurveTo(cx - 16, cy + 5, cx - 16, cy + 8, cx - 13, cy + 22);
-  ctx.lineTo(cx + 13, cy + 22);
-  ctx.bezierCurveTo(cx + 16, cy + 8, cx + 16, cy + 5, cx + 14, cy + 5);
+  ctx.moveTo(cx - 12, cy + 5);
+  ctx.bezierCurveTo(cx - 14, cy + 5, cx - 14, cy + 8, cx - 11, cy + 22);
+  ctx.lineTo(cx + 11, cy + 22);
+  ctx.bezierCurveTo(cx + 14, cy + 8, cx + 14, cy + 5, cx + 12, cy + 5);
   ctx.closePath();
   ctx.fill();
-  // Body top surface (depth)
-  ctx.fillStyle = lerpColor(color, -30);
-  ctx.beginPath(); ctx.ellipse(cx, cy + 5, 14, 5, 0, 0, Math.PI * 2); ctx.fill();
+  // Body top (depth shading)
+  ctx.fillStyle = lerpColor(color, -35);
+  ctx.beginPath(); ctx.ellipse(cx, cy + 5, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
   // Body shine
-  ctx.globalAlpha = 0.38;
+  ctx.globalAlpha = 0.35;
   ctx.fillStyle = '#fff';
-  ctx.beginPath();
-  ctx.ellipse(cx - 4, cy + 11, 7, 9, -0.25, Math.PI * 1.15, Math.PI * 1.85);
-  ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx - 3, cy + 11, 5, 8, -0.2, Math.PI * 1.15, Math.PI * 1.85); ctx.fill();
   ctx.globalAlpha = 1;
+  // Belt (brown strap)
+  ctx.fillStyle = '#5C3317';
+  ctx.fillRect(cx - 11, cy + 16, 22, 4);
+  // Belt buckle (gold)
+  ctx.fillStyle = '#FFD700';
+  ctx.fillRect(cx - 4, cy + 15, 8, 6);
+  ctx.strokeStyle = '#8B6914'; ctx.lineWidth = 1;
+  ctx.strokeRect(cx - 4, cy + 15, 8, 6);
   // Body outline
   ctx.strokeStyle = '#111'; ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.moveTo(cx - 14, cy + 5);
-  ctx.bezierCurveTo(cx - 16, cy + 5, cx - 16, cy + 8, cx - 13, cy + 22);
-  ctx.lineTo(cx + 13, cy + 22);
-  ctx.bezierCurveTo(cx + 16, cy + 8, cx + 16, cy + 5, cx + 14, cy + 5);
+  ctx.moveTo(cx - 12, cy + 5);
+  ctx.bezierCurveTo(cx - 14, cy + 5, cx - 14, cy + 8, cx - 11, cy + 22);
+  ctx.lineTo(cx + 11, cy + 22);
+  ctx.bezierCurveTo(cx + 14, cy + 8, cx + 14, cy + 5, cx + 12, cy + 5);
   ctx.closePath();
   ctx.stroke();
 
-  // Ear (left, behind head)
-  ctx.fillStyle = lerpColor(color, -15);
-  ctx.beginPath(); ctx.ellipse(cx - 18, cy - 8, 6, 8, -0.15, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.ellipse(cx - 18, cy - 8, 6, 8, -0.15, 0, Math.PI * 2); ctx.stroke();
-  // Inner ear
-  ctx.fillStyle = lerpColor(color, 25);
-  ctx.beginPath(); ctx.ellipse(cx - 18, cy - 8, 3.5, 5, -0.15, 0, Math.PI * 2); ctx.fill();
-
-  // Head (big round, 3D shaded)
-  ctx.fillStyle = color;
-  ctx.beginPath(); ctx.arc(cx, cy - 8, 19, 0, Math.PI * 2); ctx.fill();
-  // Radial gradient for 3D look
-  const hg = ctx.createRadialGradient(cx - 8, cy - 18, 2, cx, cy - 8, 21);
-  hg.addColorStop(0, 'rgba(255,255,255,0.58)');
-  hg.addColorStop(0.45, 'rgba(255,255,255,0.08)');
-  hg.addColorStop(1, 'rgba(0,0,0,0.28)');
-  ctx.fillStyle = hg;
-  ctx.beginPath(); ctx.arc(cx, cy - 8, 19, 0, Math.PI * 2); ctx.fill();
-  // Head outline
-  ctx.strokeStyle = '#111'; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.arc(cx, cy - 8, 19, 0, Math.PI * 2); ctx.stroke();
-
-  // Hair tuft
-  ctx.fillStyle = lerpColor(color, -50);
+  // Gold star badge on chest
+  ctx.save();
+  ctx.translate(cx + 5, cy + 9);
+  ctx.fillStyle = '#FFD700';
   ctx.beginPath();
-  ctx.arc(cx - 4, cy - 26, 5, Math.PI, 0);
-  ctx.arc(cx + 4, cy - 26, 4, Math.PI, 0);
+  for (let i = 0; i < 5; i++) {
+    const a = (i * 4 * Math.PI / 5) - Math.PI / 2;
+    const b = ((i * 4 + 2) * Math.PI / 5) - Math.PI / 2;
+    if (i === 0) ctx.moveTo(Math.cos(a) * 5, Math.sin(a) * 5);
+    else ctx.lineTo(Math.cos(a) * 5, Math.sin(a) * 5);
+    ctx.lineTo(Math.cos(b) * 2.5, Math.sin(b) * 2.5);
+  }
+  ctx.closePath();
   ctx.fill();
-  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.8;
-  ctx.beginPath();
-  ctx.arc(cx - 4, cy - 26, 5, Math.PI, 0);
-  ctx.arc(cx + 4, cy - 26, 4, Math.PI, 0);
+  ctx.strokeStyle = '#B8860B'; ctx.lineWidth = 0.8;
   ctx.stroke();
+  ctx.restore();
+
+  // Ear (left, skin tone)
+  ctx.fillStyle = '#F4C08A';
+  ctx.beginPath(); ctx.ellipse(cx - 17, cy - 7, 5, 7, -0.1, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.ellipse(cx - 17, cy - 7, 5, 7, -0.1, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = '#E8A070';
+  ctx.beginPath(); ctx.ellipse(cx - 17, cy - 7, 2.5, 4, -0.1, 0, Math.PI * 2); ctx.fill();
+
+  // Head (skin tone — Colt's face color)
+  ctx.fillStyle = '#F4C08A';
+  ctx.beginPath(); ctx.arc(cx, cy - 8, 17, 0, Math.PI * 2); ctx.fill();
+  const hg = ctx.createRadialGradient(cx - 7, cy - 16, 1, cx, cy - 8, 19);
+  hg.addColorStop(0, 'rgba(255,255,255,0.55)');
+  hg.addColorStop(0.5, 'rgba(255,255,255,0.05)');
+  hg.addColorStop(1, 'rgba(0,0,0,0.2)');
+  ctx.fillStyle = hg;
+  ctx.beginPath(); ctx.arc(cx, cy - 8, 17, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2.8;
+  ctx.beginPath(); ctx.arc(cx, cy - 8, 17, 0, Math.PI * 2); ctx.stroke();
+
+  // Blonde hair (visible below hat brim and around forehead)
+  ctx.fillStyle = '#F5C542';
+  ctx.beginPath();
+  ctx.arc(cx - 3, cy - 23, 8, Math.PI * 0.85, Math.PI * 1.5);
+  ctx.arc(cx + 3, cy - 23, 8, Math.PI * 1.5, Math.PI * 0.15);
+  ctx.fill();
+  ctx.strokeStyle = '#C8A020'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(cx - 3, cy - 23, 8, Math.PI * 0.85, Math.PI * 1.5);
+  ctx.stroke();
+
+  // Cowboy hat — brim
+  ctx.fillStyle = '#8B6914';
+  ctx.beginPath(); ctx.ellipse(cx, cy - 24, 23, 5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(cx, cy - 24, 23, 5, 0, 0, Math.PI * 2); ctx.stroke();
+  // Hat crown (tall, Colt style)
+  ctx.fillStyle = '#6B4F10';
+  ctx.beginPath();
+  ctx.moveTo(cx - 11, cy - 24);
+  ctx.bezierCurveTo(cx - 12, cy - 32, cx - 9, cy - 42, cx, cy - 43);
+  ctx.bezierCurveTo(cx + 9, cy - 42, cx + 12, cy - 32, cx + 11, cy - 24);
+  ctx.closePath();
+  ctx.fill();
+  // Crown gradient
+  const hatG = ctx.createLinearGradient(cx - 11, 0, cx + 11, 0);
+  hatG.addColorStop(0, 'rgba(0,0,0,0.35)');
+  hatG.addColorStop(0.35, 'rgba(255,255,255,0.15)');
+  hatG.addColorStop(1, 'rgba(0,0,0,0.25)');
+  ctx.fillStyle = hatG;
+  ctx.beginPath();
+  ctx.moveTo(cx - 11, cy - 24);
+  ctx.bezierCurveTo(cx - 12, cy - 32, cx - 9, cy - 42, cx, cy - 43);
+  ctx.bezierCurveTo(cx + 9, cy - 42, cx + 12, cy - 32, cx + 11, cy - 24);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - 11, cy - 24);
+  ctx.bezierCurveTo(cx - 12, cy - 32, cx - 9, cy - 42, cx, cy - 43);
+  ctx.bezierCurveTo(cx + 9, cy - 42, cx + 12, cy - 32, cx + 11, cy - 24);
+  ctx.closePath();
+  ctx.stroke();
+  // Hat band
+  ctx.fillStyle = '#2a1a05';
+  ctx.fillRect(cx - 11, cy - 27, 22, 4);
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1;
+  ctx.strokeRect(cx - 11, cy - 27, 22, 4);
 
   ctx.shadowBlur = 0;
 
-  // Eyebrows
-  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2.8; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(cx - 13, cy - 17); ctx.lineTo(cx - 5, cy - 15); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx + 13, cy - 17); ctx.lineTo(cx + 5, cy - 15); ctx.stroke();
+  // Eyebrows (dark blonde)
+  ctx.strokeStyle = '#8B6914'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(cx - 13, cy - 15); ctx.lineTo(cx - 5, cy - 13); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx + 13, cy - 15); ctx.lineTo(cx + 5, cy - 13); ctx.stroke();
 
-  // Eyes (white sclera)
-  const eyeY = cy - 8;
+  // Eyes — Colt's blue eyes
+  const eyeY = cy - 7;
   ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.ellipse(cx - 7, eyeY, 5.5, 6.5, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(cx + 7, eyeY, 5.5, 6.5, 0, 0, Math.PI * 2); ctx.fill();
-  // Pupils (follow aim direction)
-  const pdx = Math.cos(angle) * 2, pdy = Math.sin(angle) * 2;
-  ctx.fillStyle = '#1a1a1a';
+  ctx.beginPath(); ctx.ellipse(cx - 7, eyeY, 5, 6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 7, eyeY, 5, 6, 0, 0, Math.PI * 2); ctx.fill();
+  // Blue irises
+  const pdx = Math.cos(angle) * 1.8, pdy = Math.sin(angle) * 1.8;
+  ctx.fillStyle = '#3A8EEA';
   ctx.beginPath(); ctx.ellipse(cx - 7 + pdx, eyeY + pdy, 3.5, 4, 0, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.ellipse(cx + 7 + pdx, eyeY + pdy, 3.5, 4, 0, 0, Math.PI * 2); ctx.fill();
-  // Shine
+  // Pupils
+  ctx.fillStyle = '#0a0a0a';
+  ctx.beginPath(); ctx.ellipse(cx - 7 + pdx, eyeY + pdy, 2, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 7 + pdx, eyeY + pdy, 2, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+  // Eye shine
   ctx.fillStyle = 'rgba(255,255,255,0.95)';
-  ctx.beginPath(); ctx.arc(cx - 8.5 + pdx, eyeY - 2.5 + pdy, 2, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx + 5.5 + pdx, eyeY - 2.5 + pdy, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx - 8 + pdx, eyeY - 2 + pdy, 1.8, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 6 + pdx, eyeY - 2 + pdy, 1.8, 0, Math.PI * 2); ctx.fill();
   // Eye outlines
-  ctx.strokeStyle = '#222'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.ellipse(cx - 7, eyeY, 5.5, 6.5, 0, 0, Math.PI * 2); ctx.stroke();
-  ctx.beginPath(); ctx.ellipse(cx + 7, eyeY, 5.5, 6.5, 0, 0, Math.PI * 2); ctx.stroke();
-  // Smile
-  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.arc(cx, cy - 1, 6, 0.15, Math.PI - 0.15); ctx.stroke();
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.ellipse(cx - 7, eyeY, 5, 6, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx + 7, eyeY, 5, 6, 0, 0, Math.PI * 2); ctx.stroke();
+  // Smirk (Colt's confident smile)
+  ctx.strokeStyle = '#8B4513'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(cx + 2, cy - 1, 5, 0.1, Math.PI * 0.75); ctx.stroke();
 
   ctx.textAlign = 'center';
   ctx.font = 'bold 13px Arial';
-  ctx.fillStyle = '#000'; ctx.fillText(name, x + 1, y - 49);
-  ctx.fillStyle = isMe ? '#fff' : '#ddd'; ctx.fillText(name, x, y - 50);
+  ctx.fillStyle = '#000'; ctx.fillText(name, x + 1, y - 62);
+  ctx.fillStyle = isMe ? '#fff' : '#ddd'; ctx.fillText(name, x, y - 63);
   if (kills > 0) {
     ctx.font = 'bold 11px Arial'; ctx.fillStyle = '#ffd700';
-    ctx.fillText(`⚡${kills}`, x, y - 65);
+    ctx.fillText(`⚡${kills}`, x, y - 77);
   }
 
   // Mag pips
   const pipW = 6, pipH = 6, pipGap = 4;
   const pipTotalW = 3 * pipW + 2 * pipGap;
-  const pipX0 = x - pipTotalW / 2, pipY = y - 40;
+  const pipX0 = x - pipTotalW / 2, pipY = y - 52;
   for (let i = 0; i < 3; i++) {
     const px = pipX0 + i * (pipW + pipGap);
     const full = i < mags;
     const reloading = i === mags && mags < 3;
-    // dark background
     ctx.fillStyle = '#333'; ctx.fillRect(px, pipY, pipW, pipH);
     if (reloading) {
-      // gray fill growing left to right
       ctx.fillStyle = '#888';
       ctx.fillRect(px, pipY, pipW * magProgress, pipH);
     } else if (full) {
@@ -926,7 +999,7 @@ function drawPlayer(id, x, y, angle, hp, name, color, kills, mags, magProgress, 
     ctx.lineWidth = 0.5; ctx.strokeRect(px, pipY, pipW, pipH);
   }
 
-  drawHealthBar(id, x, y - 28, hp, MAX_HEALTH);
+  drawHealthBar(id, x, y - 42, hp, MAX_HEALTH);
 }
 
 // ---- MAIN RENDER ----
