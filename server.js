@@ -566,8 +566,7 @@ io.on('connection', (socket) => {
     for (let i = 0; i < BULLETS_PER_MAG; i++) {
       setTimeout(() => {
         if (!p.alive) return;
-        const spread = (Math.random() - 0.5) * 0.1;
-        const a = fireAngle + spread;
+        const a = fireAngle;
         const bsx = p.x + Math.cos(a) * MUZZLE_OFFSET;
         const bsy = p.y + Math.sin(a) * MUZZLE_OFFSET;
         bullets[bulletId++] = {
