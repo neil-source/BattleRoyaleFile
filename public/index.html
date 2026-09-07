@@ -536,7 +536,11 @@ document.addEventListener('keydown', e => {
   }
 });
 document.addEventListener('keyup',   e => { keys[e.code] = false; });
-canvas.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+canvas.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mouseX = (e.clientX - r.left) * (canvas.width / r.width);
+  mouseY = (e.clientY - r.top)  * (canvas.height / r.height);
+});
 canvas.addEventListener('mousedown', e => {
   if (e.button === 0 && myId && myAlive) { socket.emit('fireMag', { angle: predAngle }); spawnLocalBullets(predAngle); }
   if (e.button === 2) aimMode = true;
@@ -766,7 +770,7 @@ function drawPlayer(id, x, y, angle, hp, name, color, kills, mags, magProgress, 
 
   // Revolver (Colt-style, rotated with aim)
   ctx.save();
-  ctx.translate(cx, cy - 4);
+  ctx.translate(cx, cy);
   ctx.rotate(angle);
   // Handle (wooden grip)
   ctx.fillStyle = '#6B3A1F';
