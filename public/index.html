@@ -632,18 +632,12 @@ function getInterpolated(id) {
 // ---- PIXEL ART SPRITES ----
 ctx.imageSmoothingEnabled = false;
 
-const PLAYER_SPRITE = [
-  [0,0,0,2,2,2,2,0,0,0],
-  [0,0,2,1,1,1,1,2,0,0],
-  [0,2,1,1,1,1,1,1,2,0],
-  [2,1,1,2,1,1,2,1,1,2],
-  [2,1,1,1,1,1,1,1,1,2],
-  [2,1,1,1,1,1,1,1,1,2],
-  [2,1,1,2,1,1,2,1,1,2],
-  [0,2,1,1,1,1,1,1,2,0],
-  [0,0,2,1,1,1,1,2,0,0],
-  [0,0,0,2,2,2,2,0,0,0],
-];
+function lerpColor(hex, amt) {
+  const r = Math.max(0, Math.min(255, (parseInt(hex.slice(1,3), 16) || 0) + amt));
+  const g = Math.max(0, Math.min(255, (parseInt(hex.slice(3,5), 16) || 0) + amt));
+  const b = Math.max(0, Math.min(255, (parseInt(hex.slice(5,7), 16) || 0) + amt));
+  return `rgb(${r},${g},${b})`;
+}
 
 const COIN_SPRITE = [
   [0,0,1,1,0,0],
@@ -746,28 +740,96 @@ function drawHealthBar(id, cx, cy, hp, maxHp) {
 
 // ---- DRAW PLAYER ----
 function drawPlayer(id, x, y, angle, hp, name, color, kills, mags, magProgress, isMe) {
-  // Pixel shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.fillRect(Math.round(x - 18), Math.round(y + 14), 36, 8);
+  const cx = Math.round(x), cy = Math.round(y);
 
-  // Pixel gun barrel (rotated)
+  // Ground shadow
   ctx.save();
-  ctx.translate(Math.round(x), Math.round(y));
-  ctx.rotate(angle);
-  const gunColor = isMe ? '#cccccc' : '#666666';
-  ctx.fillStyle = '#333';      ctx.fillRect(8, -6, 4, 12);   // stock
-  ctx.fillStyle = gunColor;    ctx.fillRect(12, -4, 8, 4);   // barrel top
-  ctx.fillStyle = gunColor;    ctx.fillRect(12,  0, 8, 4);   // barrel bottom
-  ctx.fillStyle = gunColor;    ctx.fillRect(20, -4, 8, 4);
-  ctx.fillStyle = gunColor;    ctx.fillRect(20,  0, 8, 4);
-  ctx.fillStyle = gunColor;    ctx.fillRect(28, -4, 8, 4);
-  ctx.fillStyle = gunColor;    ctx.fillRect(28,  0, 8, 4);
+  ctx.globalAlpha = 0.38;
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.ellipse(cx + 3, cy + 23, 20, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
   ctx.restore();
 
-  // Pixel body sprite
-  if (isMe) { ctx.shadowColor = color; ctx.shadowBlur = 12; }
-  drawSprite(PLAYER_SPRITE, 4, Math.round(x), Math.round(y), [color, '#111']);
+  // Gun (rotated with aim angle, drawn behind body)
+  ctx.save();
+  ctx.translate(cx, cy - 2);
+  ctx.rotate(angle);
+  ctx.fillStyle = '#3a3a3a';
+  ctx.beginPath(); ctx.roundRect(10, -4, 30, 9, 3); ctx.fill();
+  ctx.fillStyle = '#666';
+  ctx.fillRect(12, -2, 26, 3);
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.roundRect(10, -4, 30, 9, 3); ctx.stroke();
+  ctx.restore();
+
+  if (isMe) { ctx.shadowColor = color; ctx.shadowBlur = 18; }
+
+  // Feet (drawn behind body)
+  const darkC = lerpColor(color, -60);
+  ctx.fillStyle = darkC;
+  ctx.beginPath(); ctx.ellipse(cx - 8, cy + 20, 8, 6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 8, cy + 20, 8, 6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.ellipse(cx - 8, cy + 20, 8, 6, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx + 8, cy + 20, 8, 6, 0, 0, Math.PI * 2); ctx.stroke();
+
+  // Body (trapezoid, wider at shoulders)
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(cx - 14, cy + 3);
+  ctx.lineTo(cx + 14, cy + 3);
+  ctx.lineTo(cx + 11, cy + 21);
+  ctx.lineTo(cx - 11, cy + 21);
+  ctx.closePath();
+  ctx.fill();
+  // Top surface (depth)
+  ctx.fillStyle = lerpColor(color, -25);
+  ctx.beginPath(); ctx.ellipse(cx, cy + 3, 14, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+  // Highlight
+  ctx.globalAlpha = 0.35;
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(cx - 2, cy + 10, 8, 6, -0.2, Math.PI, 0); ctx.fill();
+  ctx.globalAlpha = 1;
+  // Body outline
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(cx - 14, cy + 3);
+  ctx.lineTo(cx + 14, cy + 3);
+  ctx.lineTo(cx + 11, cy + 21);
+  ctx.lineTo(cx - 11, cy + 21);
+  ctx.closePath();
+  ctx.stroke();
+
+  // Head
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.ellipse(cx, cy - 7, 18, 17, 0, 0, Math.PI * 2); ctx.fill();
+  const hg = ctx.createRadialGradient(cx - 7, cy - 16, 1, cx, cy - 7, 20);
+  hg.addColorStop(0, 'rgba(255,255,255,0.52)');
+  hg.addColorStop(0.55, 'rgba(255,255,255,0)');
+  hg.addColorStop(1, 'rgba(0,0,0,0.22)');
+  ctx.fillStyle = hg;
+  ctx.beginPath(); ctx.ellipse(cx, cy - 7, 18, 17, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.ellipse(cx, cy - 7, 18, 17, 0, 0, Math.PI * 2); ctx.stroke();
+
   ctx.shadowBlur = 0;
+
+  // Eyes
+  const eyeY = cy - 7;
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(cx - 7, eyeY, 5, 6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 7, eyeY, 5, 6, 0, 0, Math.PI * 2); ctx.fill();
+  const pdx = Math.cos(angle) * 1.8, pdy = Math.sin(angle) * 1.8;
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.ellipse(cx - 7 + pdx, eyeY + pdy, 3, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 7 + pdx, eyeY + pdy, 3, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.beginPath(); ctx.ellipse(cx - 8.5 + pdx, eyeY - 2 + pdy, 1.5, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + 5.5 + pdx, eyeY - 2 + pdy, 1.5, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#222'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.ellipse(cx - 7, eyeY, 5, 6, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx + 7, eyeY, 5, 6, 0, 0, Math.PI * 2); ctx.stroke();
 
   ctx.textAlign = 'center';
   ctx.font = 'bold 13px Arial';
