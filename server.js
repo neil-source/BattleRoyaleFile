@@ -191,6 +191,18 @@ function safeSpawn() {
   return { x: ARENA_W / 2, y: ARENA_H / 2 };
 }
 
+function safeCoinPos(cx, cy) {
+  if (!hitsWall(cx, cy, 8)) return { x: cx, y: cy };
+  for (let r = CELL; r <= CELL * 3; r += CELL / 2) {
+    for (let tries = 0; tries < 12; tries++) {
+      const a = Math.random() * Math.PI * 2;
+      const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+      if (x > 0 && y > 0 && x < ARENA_W && y < ARENA_H && !hitsWall(x, y, 8)) return { x, y };
+    }
+  }
+  return { x: cx, y: cy };
+}
+
 function dropCoins(p, now) {
   const count = 3 + Math.floor(Math.random() * 5);
   for (let i = 0; i < count; i++) {
@@ -198,12 +210,14 @@ function dropCoins(p, now) {
     const d = 15 + Math.random() * 55;
     const v = 1 + Math.floor(Math.random() * 4);
     const id = coinId++;
-    worldCoins[id] = { id, x: p.x + Math.cos(a) * d, y: p.y + Math.sin(a) * d, value: v, born: now };
+    const pos = safeCoinPos(p.x + Math.cos(a) * d, p.y + Math.sin(a) * d);
+    worldCoins[id] = { id, x: pos.x, y: pos.y, value: v, born: now };
   }
   const bonus = Math.min(50, Math.floor((coinData[p.userId] || 0) * 0.08));
   if (bonus > 0) {
     const id = coinId++;
-    worldCoins[id] = { id, x: p.x, y: p.y, value: bonus, born: now };
+    const pos = safeCoinPos(p.x, p.y);
+    worldCoins[id] = { id, x: pos.x, y: pos.y, value: bonus, born: now };
   }
 }
 
